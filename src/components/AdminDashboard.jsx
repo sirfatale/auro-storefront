@@ -7,7 +7,7 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('list')
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    category: 'Technology',
     price: '',
     description: '',
     affiliate_link: '',
@@ -16,6 +16,7 @@ function AdminDashboard() {
   const [editingId, setEditingId] = useState(null)
   const [message, setMessage] = useState('')
   const [categories, setCategories] = useState([])
+  const [newCategory, setNewCategory] = useState('')
 
   useEffect(() => {
     fetchProducts()
@@ -57,16 +58,23 @@ function AdminDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.name || !formData.price || !formData.affiliate_link) {
+    let finalCategory = formData.category
+    if (formData.category === 'add-new' && newCategory.trim()) {
+      finalCategory = newCategory.trim()
+    }
+
+    if (!formData.name || !finalCategory || !formData.price || !formData.affiliate_link) {
       showMessage('Please fill in all required fields')
       return
     }
 
     try {
+      const dataToSubmit = { ...formData, category: finalCategory }
+
       if (editingId) {
         const { error } = await supabase
           .from('products')
-          .update(formData)
+          .update(dataToSubmit)
           .eq('id', editingId)
 
         if (error) throw error
@@ -75,7 +83,7 @@ function AdminDashboard() {
       } else {
         const { error } = await supabase
           .from('products')
-          .insert([formData])
+          .insert([dataToSubmit])
 
         if (error) throw error
         showMessage('Product added successfully!')
@@ -83,12 +91,13 @@ function AdminDashboard() {
 
       setFormData({
         name: '',
-        category: '',
+        category: 'Technology',
         price: '',
         description: '',
         affiliate_link: '',
         active: true,
       })
+      setNewCategory('')
       setActiveTab('list')
       fetchProducts()
     } catch (err) {
@@ -130,12 +139,13 @@ function AdminDashboard() {
     setEditingId(null)
     setFormData({
       name: '',
-      category: '',
+      category: 'Technology',
       price: '',
       description: '',
       affiliate_link: '',
       active: true,
     })
+    setNewCategory('')
   }
 
   return (
@@ -231,23 +241,39 @@ function AdminDashboard() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="category">Category * (Type to create new or select existing)</label>
-                <input
-                  type="text"
+                <label htmlFor="category">Category *</label>
+                <select
                   id="category"
                   name="category"
-                  list="categoryList"
                   value={formData.category}
                   onChange={handleInputChange}
-                  placeholder="e.g., Technology, Tools, Electronics, etc."
                   required
-                />
-                <datalist id="categoryList">
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat} />
-                  ))}
-                </datalist>
+                >
+                  <option value="Technology">Technology</option>
+                  <option value="Tools">Tools</option>
+                  <option value="Electronics">Electronics</option>
+                  {categories.map((cat) =>
+                    !['Technology', 'Tools', 'Electronics'].includes(cat) && (
+                      <option key={cat} value={cat}>{cat}</option>
+                    )
+                  )}
+                  <option value="add-new">+ Add new category</option>
+                </select>
               </div>
+
+              {formData.category === 'add-new' && (
+                <div className="form-group">
+                  <label htmlFor="newCategory">New Category Name *</label>
+                  <input
+                    type="text"
+                    id="newCategory"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    placeholder="Enter new category name"
+                    required={formData.category === 'add-new'}
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="price">Price (USD) *</label>
