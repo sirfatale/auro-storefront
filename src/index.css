@@ -10,8 +10,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
-  color: #1a1a1a;
+  background: #0f0f0f;
+  color: #e0e0e0;
   min-height: 100vh;
 }
 
@@ -115,7 +115,7 @@ main {
 
 .category-title {
   font-size: 2rem;
-  color: var(--auro-dark-blue);
+  color: #ffffff;
   margin-bottom: 2rem;
   border-bottom: 4px solid var(--auro-accent);
   padding-bottom: 0.75rem;
@@ -130,12 +130,12 @@ main {
 }
 
 .product-card {
-  background-color: var(--auro-white);
-  border: 1px solid var(--auro-gray);
+  background-color: #1a1a1a;
+  border: 1px solid #333;
   border-radius: 12px;
   padding: 1.75rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -143,27 +143,28 @@ main {
 
 .product-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 44, 102, 0.2);
+  box-shadow: 0 16px 40px rgba(0, 102, 204, 0.3);
   border-color: var(--auro-accent);
+  background-color: #222;
 }
 
 .product-name {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--auro-dark-blue);
+  color: #ffffff;
   margin-bottom: 0.75rem;
   line-height: 1.4;
 }
 
 .product-price {
   font-size: 1.8rem;
-  color: var(--auro-accent);
+  color: #4aa3ff;
   font-weight: 800;
   margin-bottom: 1.25rem;
 }
 
 .product-description {
-  color: #555;
+  color: #b0b0b0;
   margin-bottom: 1.5rem;
   font-size: 0.95rem;
   line-height: 1.6;
@@ -212,15 +213,15 @@ main {
 
 .dashboard-nav button {
   padding: 0.9rem 1.25rem;
-  background-color: var(--auro-white);
-  border: 2px solid transparent;
+  background-color: #1a1a1a;
+  border: 2px solid #333;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  color: var(--auro-dark-blue);
+  color: #e0e0e0;
   transition: all 0.2s;
   text-align: left;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .dashboard-nav button.active {
@@ -244,7 +245,7 @@ main {
   display: block;
   margin-bottom: 0.6rem;
   font-weight: 600;
-  color: var(--auro-dark-blue);
+  color: #ffffff;
   font-size: 0.95rem;
 }
 
@@ -253,12 +254,13 @@ main {
 .form-group select {
   width: 100%;
   padding: 0.9rem 1rem;
-  border: 2px solid var(--auro-border);
+  border: 2px solid #333;
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: inherit;
   transition: all 0.2s;
-  background-color: var(--auro-white);
+  background-color: #1a1a1a;
+  color: #ffffff;
 }
 
 .form-group textarea {
@@ -314,14 +316,14 @@ main {
 }
 
 .btn-secondary {
-  background-color: var(--auro-white);
-  color: var(--auro-dark-blue);
-  border: 2px solid var(--auro-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  border: 2px solid #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .btn-secondary:hover {
-  background-color: var(--auro-light-gray);
+  background-color: #222;
   border-color: var(--auro-accent);
   color: var(--auro-accent);
 }
@@ -347,8 +349,9 @@ main {
 
 .products-table td {
   padding: 1.1rem 1.25rem;
-  border-bottom: 1px solid var(--auro-gray);
-  background-color: var(--auro-white);
+  border-bottom: 1px solid #333;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
 }
 
 .products-table tr:last-child td {
@@ -356,7 +359,7 @@ main {
 }
 
 .products-table tbody tr:hover {
-  background-color: var(--auro-light-gray);
+  background-color: #222;
 }
 
 /* Footer */
@@ -425,16 +428,17 @@ footer {
 }
 
 .modal {
-  background-color: var(--auro-white);
+  background-color: #1a1a1a;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   max-width: 450px;
   width: 90%;
+  border: 1px solid #333;
 }
 
 .modal h2 {
-  color: var(--auro-dark-blue);
+  color: #ffffff;
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
   font-weight: 700;
@@ -443,11 +447,13 @@ footer {
 .modal input {
   width: 100%;
   padding: 1rem;
-  border: 2px solid var(--auro-border);
+  border: 2px solid #333;
   border-radius: 8px;
   font-size: 1rem;
   margin-bottom: 1.5rem;
   transition: all 0.2s;
+  background-color: #0f0f0f;
+  color: #ffffff;
 }
 
 .modal input:focus {
