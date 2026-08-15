@@ -157,6 +157,7 @@ function AdminDashboard() {
 
       const html = await response.text()
 
+      // Fetch image
       const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/)
       if (ogImageMatch && ogImageMatch[1]) {
         setFormData((prev) => ({
@@ -167,8 +168,20 @@ function AdminDashboard() {
       } else {
         showMessage('Could not find image on Amazon page. You can paste the image URL manually.')
       }
+
+      // Fetch price
+      const priceMatch = html.match(/<span class="a-price-whole">([^<]+)<\/span>/)
+      if (priceMatch && priceMatch[1]) {
+        const price = priceMatch[1].replace(/[^0-9.]/g, '')
+        if (price) {
+          setFormData((prev) => ({
+            ...prev,
+            price: parseFloat(price),
+          }))
+        }
+      }
     } catch (err) {
-      showMessage('Error fetching image: ' + err.message)
+      showMessage('Error fetching from Amazon: ' + err.message)
     } finally {
       setFetchingImage(false)
     }
