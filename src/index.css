@@ -605,23 +605,6 @@ footer {
   max-width: 600px;
 }
 
-.image-input-group {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.image-input-group input {
-  flex: 1;
-}
-
-.image-input-group .btn {
-  white-space: nowrap;
-  margin-top: 0;
-  height: fit-content;
-  padding: 0.9rem 1.5rem;
-}
-
 .image-preview {
   margin-top: 1.5rem;
   border: 2px solid #333;

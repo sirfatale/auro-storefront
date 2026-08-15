@@ -18,7 +18,6 @@ function AdminDashboard() {
   const [message, setMessage] = useState('')
   const [categories, setCategories] = useState([])
   const [newCategory, setNewCategory] = useState('')
-  const [fetchingImage, setFetchingImage] = useState(false)
 
   useEffect(() => {
     fetchProducts()
@@ -136,74 +135,6 @@ function AdminDashboard() {
     } catch (err) {
       showMessage('Error: ' + err.message)
     }
-  }
-
-  const fetchImageFromAmazon = async () => {
-    if (!formData.affiliate_link) {
-      showMessage('Please enter an Amazon affiliate link first')
-      return
-    }
-
-    setFetchingImage(true)
-    const proxies = [
-      'https://api.allorigins.win/raw?url=',
-      'https://cors-anywhere.herokuapp.com/',
-    ]
-
-    let success = false
-
-    for (const proxy of proxies) {
-      try {
-        const url = proxy.includes('allorigins')
-          ? proxy + encodeURIComponent(formData.affiliate_link)
-          : proxy + formData.affiliate_link
-
-        const response = await fetch(url, {
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-        })
-
-        if (!response.ok) continue
-
-        const html = await response.text()
-
-        // Fetch image
-        const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/)
-        if (ogImageMatch && ogImageMatch[1]) {
-          setFormData((prev) => ({
-            ...prev,
-            image_url: ogImageMatch[1],
-          }))
-          showMessage('Image fetched successfully!')
-          success = true
-        }
-
-        // Fetch price
-        const priceMatch = html.match(/<span class="a-price-whole">([^<]+)<\/span>/)
-        if (priceMatch && priceMatch[1]) {
-          const price = priceMatch[1].replace(/[^0-9.]/g, '')
-          if (price) {
-            setFormData((prev) => ({
-              ...prev,
-              price: parseFloat(price),
-            }))
-          }
-        }
-
-        if (success) break
-      } catch (err) {
-        continue
-      }
-    }
-
-    if (!success) {
-      showMessage(
-        'Could not auto-fetch. Quick fix: Right-click product image on Amazon → Copy image address, then paste it above.'
-      )
-    }
-
-    setFetchingImage(false)
   }
 
   const handleCancel = () => {
@@ -385,25 +316,15 @@ function AdminDashboard() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="image_url">Product Image URL</label>
-                <div className="image-input-group">
-                  <input
-                    type="url"
-                    id="image_url"
-                    name="image_url"
-                    value={formData.image_url}
-                    onChange={handleInputChange}
-                    placeholder="Image URL will appear here"
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={fetchImageFromAmazon}
-                    disabled={fetchingImage}
-                  >
-                    {fetchingImage ? 'Fetching...' : 'Fetch from Amazon'}
-                  </button>
-                </div>
+                <label htmlFor="image_url">Product Image URL (Optional)</label>
+                <input
+                  type="url"
+                  id="image_url"
+                  name="image_url"
+                  value={formData.image_url}
+                  onChange={handleInputChange}
+                  placeholder="Paste Amazon image URL here (right-click image → Copy image address)"
+                />
                 {formData.image_url && (
                   <div className="image-preview">
                     <img src={formData.image_url} alt="Product preview" />
