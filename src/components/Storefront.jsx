@@ -5,6 +5,8 @@ function Storefront() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
 
   useEffect(() => {
     fetchProducts()
@@ -44,6 +46,17 @@ function Storefront() {
   const grouped = groupByCategory(products)
   const categories = Object.keys(grouped).sort()
 
+  const filteredProducts = products.filter((product) => {
+    const matchSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+      product.description
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    const matchCategory = !selectedCategory || product.category === selectedCategory
+    return matchSearch && matchCategory
+  })
+
   if (loading) {
     return <div className="storefront-loading">Loading products...</div>
   }
@@ -62,11 +75,75 @@ function Storefront() {
 
   return (
     <div className="storefront">
-      {categories.map((category) => (
-        <section key={category} className="category-section">
-          <h2 className="category-title">{category}</h2>
+      {/* Search & Filter Section */}
+      <section className="search-section">
+        <h2 className="section-title">Shop</h2>
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="category-select"
+          >
+            <option value="">All categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              setSearchTerm('')
+              setSelectedCategory('')
+            }}
+            className="btn btn-primary"
+          >
+            Search
+          </button>
+        </div>
+      </section>
+
+      {/* Shop by Category Section */}
+      <section className="category-showcase">
+        <h2 className="section-title">Shop by category</h2>
+        <div className="category-grid">
+          {categories.map((category) => (
+            <div
+              key={category}
+              className="category-card"
+              onClick={() => setSelectedCategory(category)}
+            >
+              <div className="category-card-content">
+                <div className="category-icon">📦</div>
+              </div>
+              <div className="category-label">
+                {category} ({grouped[category].length})
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* All Products Section */}
+      <section className="all-products">
+        <h2 className="section-title">
+          {selectedCategory ? `${selectedCategory} Products` : 'All products'}
+        </h2>
+        <div className="products-count">
+          Showing 1-{filteredProducts.length} of {filteredProducts.length} results
+        </div>
+        {filteredProducts.length === 0 ? (
+          <div className="no-results">No products found matching your search.</div>
+        ) : (
           <div className="products-grid">
-            {grouped[category].map((product) => (
+            {filteredProducts.map((product) => (
               <div key={product.id} className="product-card">
                 <div className="product-name">{product.name}</div>
                 <div className="product-price">
@@ -88,8 +165,8 @@ function Storefront() {
               </div>
             ))}
           </div>
-        </section>
-      ))}
+        )}
+      </section>
     </div>
   )
 }
