@@ -143,6 +143,9 @@ function Storefront() {
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <div key={product.id} className="product-card">
+                {product.image_url && (
+                  <img src={product.image_url} alt={product.name} className="product-image" />
+                )}
                 <div className="product-name">{product.name}</div>
                 <div className="product-price">
                   ${product.price.toFixed(2)}
@@ -174,6 +177,9 @@ function Storefront() {
                   <div className="products-grid">
                     {categoryProducts.map((product) => (
                       <div key={product.id} className="product-card">
+                        {product.image_url && (
+                          <img src={product.image_url} alt={product.name} className="product-image" />
+                        )}
                         <div className="product-name">{product.name}</div>
                         <div className="product-price">
                           ${product.price.toFixed(2)}

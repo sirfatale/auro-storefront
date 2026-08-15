@@ -11,12 +11,14 @@ function AdminDashboard() {
     price: '',
     description: '',
     affiliate_link: '',
+    image_url: '',
     active: true,
   })
   const [editingId, setEditingId] = useState(null)
   const [message, setMessage] = useState('')
   const [categories, setCategories] = useState([])
   const [newCategory, setNewCategory] = useState('')
+  const [fetchingImage, setFetchingImage] = useState(false)
 
   useEffect(() => {
     fetchProducts()
@@ -95,6 +97,7 @@ function AdminDashboard() {
         price: '',
         description: '',
         affiliate_link: '',
+        image_url: '',
         active: true,
       })
       setNewCategory('')
@@ -135,6 +138,42 @@ function AdminDashboard() {
     }
   }
 
+  const fetchImageFromAmazon = async () => {
+    if (!formData.affiliate_link) {
+      showMessage('Please enter an Amazon affiliate link first')
+      return
+    }
+
+    setFetchingImage(true)
+    try {
+      const corsProxy = 'https://cors-anywhere.herokuapp.com/'
+      const response = await fetch(corsProxy + formData.affiliate_link, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      })
+
+      if (!response.ok) throw new Error('Failed to fetch Amazon page')
+
+      const html = await response.text()
+
+      const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/)
+      if (ogImageMatch && ogImageMatch[1]) {
+        setFormData((prev) => ({
+          ...prev,
+          image_url: ogImageMatch[1],
+        }))
+        showMessage('Image fetched successfully!')
+      } else {
+        showMessage('Could not find image on Amazon page. You can paste the image URL manually.')
+      }
+    } catch (err) {
+      showMessage('Error fetching image: ' + err.message)
+    } finally {
+      setFetchingImage(false)
+    }
+  }
+
   const handleCancel = () => {
     setEditingId(null)
     setFormData({
@@ -143,6 +182,7 @@ function AdminDashboard() {
       price: '',
       description: '',
       affiliate_link: '',
+      image_url: '',
       active: true,
     })
     setNewCategory('')
@@ -310,6 +350,33 @@ function AdminDashboard() {
                   placeholder="https://amazon.com/..."
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="image_url">Product Image URL</label>
+                <div className="image-input-group">
+                  <input
+                    type="url"
+                    id="image_url"
+                    name="image_url"
+                    value={formData.image_url}
+                    onChange={handleInputChange}
+                    placeholder="Image URL will appear here"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={fetchImageFromAmazon}
+                    disabled={fetchingImage}
+                  >
+                    {fetchingImage ? 'Fetching...' : 'Fetch from Amazon'}
+                  </button>
+                </div>
+                {formData.image_url && (
+                  <div className="image-preview">
+                    <img src={formData.image_url} alt="Product preview" />
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
