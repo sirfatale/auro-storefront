@@ -141,19 +141,26 @@ main {
   border: 2px solid #333;
   border-radius: 8px;
   font-size: 0.95rem;
-  background-color: #1a1a1a;
+  background-color: #0f0f0f !important;
   color: #ffffff !important;
-  transition: all 0.2s;
+  transition: border-color 0.2s;
 }
 
 .search-input:focus {
   outline: none;
   border-color: var(--auro-accent);
-  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+  background-color: #0f0f0f !important;
 }
 
 .search-input::placeholder {
   color: #777;
+}
+
+.search-input:-webkit-autofill,
+.search-input:-webkit-autofill:hover,
+.search-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #0f0f0f inset !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 .category-select {
@@ -392,8 +399,8 @@ main {
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: inherit;
-  transition: all 0.2s;
-  background-color: #1a1a1a;
+  transition: border-color 0.2s;
+  background-color: #0f0f0f !important;
   color: #ffffff !important;
 }
 
@@ -401,13 +408,15 @@ main {
   color: #777;
 }
 
-.form-group input::-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
-  -webkit-text-fill-color: #ffffff !important;
+.form-group input:focus {
+  background-color: #0f0f0f !important;
 }
 
-.form-group input::-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus,
+.form-group input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #0f0f0f inset !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 
@@ -599,13 +608,24 @@ footer {
   border-radius: 8px;
   font-size: 1rem;
   margin-bottom: 1.5rem;
-  transition: all 0.2s;
-  background-color: #0f0f0f;
+  transition: border-color 0.2s;
+  background-color: #0f0f0f !important;
   color: #ffffff !important;
+}
+
+.modal input:focus {
+  background-color: #0f0f0f !important;
 }
 
 .modal input::placeholder {
   color: #777;
+}
+
+.modal input:-webkit-autofill,
+.modal input:-webkit-autofill:hover,
+.modal input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #0f0f0f inset !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 .modal input:focus {
