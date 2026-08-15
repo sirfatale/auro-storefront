@@ -145,46 +145,65 @@ function AdminDashboard() {
     }
 
     setFetchingImage(true)
-    try {
-      const corsProxy = 'https://cors-anywhere.herokuapp.com/'
-      const response = await fetch(corsProxy + formData.affiliate_link, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      })
+    const proxies = [
+      'https://api.allorigins.win/raw?url=',
+      'https://cors-anywhere.herokuapp.com/',
+    ]
 
-      if (!response.ok) throw new Error('Failed to fetch Amazon page')
+    let success = false
 
-      const html = await response.text()
+    for (const proxy of proxies) {
+      try {
+        const url = proxy.includes('allorigins')
+          ? proxy + encodeURIComponent(formData.affiliate_link)
+          : proxy + formData.affiliate_link
 
-      // Fetch image
-      const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/)
-      if (ogImageMatch && ogImageMatch[1]) {
-        setFormData((prev) => ({
-          ...prev,
-          image_url: ogImageMatch[1],
-        }))
-        showMessage('Image fetched successfully!')
-      } else {
-        showMessage('Could not find image on Amazon page. You can paste the image URL manually.')
-      }
+        const response = await fetch(url, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        })
 
-      // Fetch price
-      const priceMatch = html.match(/<span class="a-price-whole">([^<]+)<\/span>/)
-      if (priceMatch && priceMatch[1]) {
-        const price = priceMatch[1].replace(/[^0-9.]/g, '')
-        if (price) {
+        if (!response.ok) continue
+
+        const html = await response.text()
+
+        // Fetch image
+        const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/)
+        if (ogImageMatch && ogImageMatch[1]) {
           setFormData((prev) => ({
             ...prev,
-            price: parseFloat(price),
+            image_url: ogImageMatch[1],
           }))
+          showMessage('Image fetched successfully!')
+          success = true
         }
+
+        // Fetch price
+        const priceMatch = html.match(/<span class="a-price-whole">([^<]+)<\/span>/)
+        if (priceMatch && priceMatch[1]) {
+          const price = priceMatch[1].replace(/[^0-9.]/g, '')
+          if (price) {
+            setFormData((prev) => ({
+              ...prev,
+              price: parseFloat(price),
+            }))
+          }
+        }
+
+        if (success) break
+      } catch (err) {
+        continue
       }
-    } catch (err) {
-      showMessage('Error fetching from Amazon: ' + err.message)
-    } finally {
-      setFetchingImage(false)
     }
+
+    if (!success) {
+      showMessage(
+        'Could not auto-fetch. Quick fix: Right-click product image on Amazon → Copy image address, then paste it above.'
+      )
+    }
+
+    setFetchingImage(false)
   }
 
   const handleCancel = () => {
