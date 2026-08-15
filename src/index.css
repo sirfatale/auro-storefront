@@ -254,6 +254,22 @@ main {
   margin-bottom: 4rem;
 }
 
+.category-section-title {
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  margin-top: 3rem;
+  font-weight: 700;
+  border-bottom: 3px solid var(--auro-accent);
+  padding-bottom: 0.75rem;
+}
+
+.category-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #333, transparent);
+  margin: 4rem 0;
+}
+
 .category-title {
   font-size: 2rem;
   color: #ffffff;

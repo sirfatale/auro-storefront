@@ -131,17 +131,15 @@ function Storefront() {
         </div>
       </section>
 
-      {/* All Products Section */}
+      {/* Products by Category Section */}
       <section className="all-products">
         <h2 className="section-title">
-          {selectedCategory ? `${selectedCategory} Products` : 'All products'}
+          {selectedCategory ? `${selectedCategory}` : 'All products'}
         </h2>
-        <div className="products-count">
-          Showing 1-{filteredProducts.length} of {filteredProducts.length} results
-        </div>
         {filteredProducts.length === 0 ? (
           <div className="no-results">No products found matching your search.</div>
-        ) : (
+        ) : selectedCategory ? (
+          // Show single category
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <div key={product.id} className="product-card">
@@ -165,6 +163,42 @@ function Storefront() {
               </div>
             ))}
           </div>
+        ) : (
+          // Show all categories with sections
+          <>
+            {categories.map((category, index) => {
+              const categoryProducts = grouped[category]
+              return (
+                <div key={category}>
+                  <h3 className="category-section-title">{category}</h3>
+                  <div className="products-grid">
+                    {categoryProducts.map((product) => (
+                      <div key={product.id} className="product-card">
+                        <div className="product-name">{product.name}</div>
+                        <div className="product-price">
+                          ${product.price.toFixed(2)}
+                        </div>
+                        {product.description && (
+                          <div className="product-description">
+                            {product.description}
+                          </div>
+                        )}
+                        <a
+                          href={product.affiliate_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="product-link"
+                        >
+                          View on Amazon
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                  {index < categories.length - 1 && <div className="category-divider" />}
+                </div>
+              )
+            })}
+          </>
         )}
       </section>
     </div>
