@@ -142,7 +142,7 @@ main {
   border-radius: 8px;
   font-size: 0.95rem;
   background-color: #1a1a1a;
-  color: #ffffff;
+  color: #ffffff !important;
   transition: all 0.2s;
 }
 
@@ -153,7 +153,7 @@ main {
 }
 
 .search-input::placeholder {
-  color: #666;
+  color: #777;
 }
 
 .category-select {
@@ -394,7 +394,21 @@ main {
   font-family: inherit;
   transition: all 0.2s;
   background-color: #1a1a1a;
-  color: #ffffff;
+  color: #ffffff !important;
+}
+
+.form-group input::placeholder {
+  color: #777;
+}
+
+.form-group input::-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.form-group input::-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 .form-group textarea {
@@ -587,7 +601,11 @@ footer {
   margin-bottom: 1.5rem;
   transition: all 0.2s;
   background-color: #0f0f0f;
-  color: #ffffff;
+  color: #ffffff !important;
+}
+
+.modal input::placeholder {
+  color: #777;
 }
 
 .modal input:focus {
