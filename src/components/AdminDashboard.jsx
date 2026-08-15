@@ -7,7 +7,7 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('list')
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Technology',
+    category: '',
     price: '',
     description: '',
     affiliate_link: '',
@@ -15,6 +15,7 @@ function AdminDashboard() {
   })
   const [editingId, setEditingId] = useState(null)
   const [message, setMessage] = useState('')
+  const [categories, setCategories] = useState([])
 
   useEffect(() => {
     fetchProducts()
@@ -30,6 +31,9 @@ function AdminDashboard() {
 
       if (error) throw error
       setProducts(data || [])
+
+      const uniqueCategories = [...new Set(data?.map(p => p.category) || [])]
+      setCategories(uniqueCategories.sort())
     } catch (err) {
       showMessage('Error loading products: ' + err.message)
     } finally {
@@ -79,7 +83,7 @@ function AdminDashboard() {
 
       setFormData({
         name: '',
-        category: 'Technology',
+        category: '',
         price: '',
         description: '',
         affiliate_link: '',
@@ -126,7 +130,7 @@ function AdminDashboard() {
     setEditingId(null)
     setFormData({
       name: '',
-      category: 'Technology',
+      category: '',
       price: '',
       description: '',
       affiliate_link: '',
@@ -227,18 +231,22 @@ function AdminDashboard() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="category">Category *</label>
-                <select
+                <label htmlFor="category">Category * (Type to create new or select existing)</label>
+                <input
+                  type="text"
                   id="category"
                   name="category"
+                  list="categoryList"
                   value={formData.category}
                   onChange={handleInputChange}
+                  placeholder="e.g., Technology, Tools, Electronics, etc."
                   required
-                >
-                  <option value="Technology">Technology</option>
-                  <option value="Tools">Tools</option>
-                  <option value="Electronics">Electronics</option>
-                </select>
+                />
+                <datalist id="categoryList">
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat} />
+                  ))}
+                </datalist>
               </div>
 
               <div className="form-group">
