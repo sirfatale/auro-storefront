@@ -1,21 +1,38 @@
-import { useState, useEffect } from 'react'
-import Storefront from './components/Storefront'
+import { useState } from 'react'
+import { Routes, Route, useNavigate } from 'react-router-dom'
+import { ThemeProvider } from './context/ThemeContext'
+import DisclosureBanner from './components/DisclosureBanner'
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import Home from './pages/Home'
+import Shop from './pages/Shop'
+import Contact from './pages/Contact'
+import AffiliateDisclosure from './pages/AffiliateDisclosure'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdminDashboard from './components/AdminDashboard'
-import './App.css'
+
+function AdminGate({ onLoginClick }) {
+  return (
+    <div className="state-message">
+      <p style={{ marginBottom: '1rem' }}>Admin access required.</p>
+      <button className="btn btn-primary" onClick={onLoginClick}>
+        Log In
+      </button>
+    </div>
+  )
+}
 
 function App() {
-  const [view, setView] = useState('storefront')
   const [isAdmin, setIsAdmin] = useState(false)
-  const [adminPassword, setAdminPassword] = useState('')
   const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const navigate = useNavigate()
 
   const handleAdminAccess = (password) => {
     const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123'
     if (password === correctPassword) {
       setIsAdmin(true)
-      setAdminPassword(password)
-      setView('dashboard')
       setShowPasswordForm(false)
+      navigate('/admin')
     } else {
       alert('Incorrect password')
     }
@@ -23,80 +40,77 @@ function App() {
 
   const handleLogout = () => {
     setIsAdmin(false)
-    setAdminPassword('')
-    setView('storefront')
+    navigate('/')
   }
 
   return (
-    <>
-      <header>
-        <div className="header-content">
-          <a href="#" className="logo" onClick={() => setView('storefront')}>
-            AURO TECHNOLOGY GROUP STOREFRONT
-          </a>
-          <nav>
-            <a href="#" onClick={() => setView('storefront')}>Home</a>
-            {!isAdmin && (
-              <button onClick={() => setShowPasswordForm(true)}>
-                Admin
-              </button>
-            )}
-            {isAdmin && (
-              <>
-                <a href="#" onClick={() => setView('dashboard')}>Dashboard</a>
-                <button onClick={handleLogout}>Logout</button>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+    <ThemeProvider>
+      <DisclosureBanner />
+      <Navbar
+        onAdminClick={() => setShowPasswordForm(true)}
+        isAdmin={isAdmin}
+        onLogout={handleLogout}
+      />
 
-      <main>
-        {showPasswordForm && !isAdmin && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Admin Access</h2>
-              <input
-                type="password"
-                placeholder="Enter admin password"
-                id="admin-password"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAdminAccess(e.target.value)
-                  }
+      {showPasswordForm && !isAdmin && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Admin Access</h2>
+            <input
+              type="password"
+              placeholder="Enter admin password"
+              id="admin-password"
+              autoFocus
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleAdminAccess(e.target.value)
+                }
+              }}
+            />
+            <div className="modal-buttons">
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  const pwd = document.getElementById('admin-password').value
+                  handleAdminAccess(pwd)
                 }}
-              />
-              <div className="modal-buttons">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    const pwd = document.getElementById('admin-password').value
-                    handleAdminAccess(pwd)
-                  }}
-                >
-                  Login
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowPasswordForm(false)}
-                >
-                  Cancel
-                </button>
-              </div>
+              >
+                Login
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowPasswordForm(false)}
+              >
+                Cancel
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {view === 'storefront' && !isAdmin && <Storefront />}
-        {view === 'dashboard' && isAdmin && (
-          <AdminDashboard adminPassword={adminPassword} />
-        )}
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route
+            path="/admin"
+            element={
+              isAdmin ? (
+                <AdminDashboard />
+              ) : (
+                <AdminGate onLoginClick={() => setShowPasswordForm(true)} />
+              )
+            }
+          />
+          <Route path="*" element={<Home />} />
+        </Routes>
       </main>
 
-      <footer>
-        <p>&copy; 2024 Auro Technology Group. All rights reserved.</p>
-      </footer>
-    </>
+      <Footer />
+    </ThemeProvider>
   )
 }
 

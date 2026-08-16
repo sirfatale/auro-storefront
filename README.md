@@ -1,21 +1,39 @@
-# Auro Technology Group StoreFront
+# ATG Tech Picks
 
-A professional Amazon affiliate storefront for Auro Technology Group, built with React and Supabase.
+An Amazon affiliate storefront for Auro Technology Group, built with React and Supabase.
+Content/curation site — no cart or checkout, every product links out to Amazon.
 
 ## Features
 
-- **Public Storefront**: Display products organized by category (Technology, Tools, Electronics)
-- **Admin Dashboard**: Easy product management with add, edit, and delete functionality
-- **Responsive Design**: Mobile-friendly layout matching Auro branding
-- **Password Protected**: Secure admin access
-- **Amazon Integration**: Direct links to Amazon products with your affiliate URLs
+- **Homepage**: Hero banner, shop-by-category grid, curated "Top Picks" section, trust content, and deal-alert newsletter signup
+- **Shop Page**: Product grid with live search, category filter, sort (Featured / Price / Newest), and a "Showing N products" count
+- **Admin Dashboard**: Add, edit, and delete products; create new categories on the fly
+- **Affiliate Disclosure & Privacy Policy pages**: Placeholder legal copy — see the note below before launch
+- **Dark mode**: Light by default, with a toggle (saved to `localStorage`)
+- **Responsive Design**: Mobile, tablet, and desktop layouts
+- **Password Protected Admin**: Simple password gate for the dashboard
 
 ## Tech Stack
 
-- **Frontend**: React + Vite
+- **Frontend**: React + Vite + React Router
 - **Backend**: Supabase (PostgreSQL database)
-- **Styling**: Custom CSS with Auro branding colors
-- **Hosting**: Hostinger or any static hosting
+- **Styling**: Custom CSS with CSS variables (light/dark theme tokens)
+- **Hosting**: Cloudflare Pages (auto-deploys on push to GitHub)
+
+## ⚠️ Before You Go Live: Amazon Associates Compliance
+
+This site was built to be structurally compliant, but **you must review it against the current
+[Amazon Associates Program Operating Agreement](https://affiliate-program.amazon.com/help/operating/agreement)**
+before launch. In particular, double-check:
+
+- **Link format**: every affiliate link must include your real Associate tag (`?tag=your-associate-id`) — the admin form currently accepts any URL you paste in.
+- **Disclosure placement**: the "As an Amazon Associate, we earn from qualifying purchases" banner and the Affiliate Disclosure page are placeholders — confirm wording and placement satisfy both the FTC and Amazon's own requirements.
+- **No cached prices/stock claims**: the product cards show a "price as of [date]" note (today's date, not a stored value) — Amazon's rules prohibit displaying prices or availability as if they're live/guaranteed, so don't add a "last synced" price field without re-reading the rules on this.
+- **Privacy Policy**: has placeholder copy only — update it to reflect exactly what you collect (newsletter emails, analytics, cookies) and have a lawyer review it.
+
+The Affiliate Disclosure and Privacy Policy pages (`src/pages/AffiliateDisclosure.jsx`,
+`src/pages/PrivacyPolicy.jsx`) both have an inline `legal-notice` callout flagging them as
+placeholder copy.
 
 ## Prerequisites
 
@@ -184,24 +202,25 @@ VITE_ADMIN_PASSWORD=your-new-password
 
 ### Change Categories
 
-Edit `src/components/AdminDashboard.jsx`, find the select element:
-```jsx
-<select id="category" name="category" ...>
-  <option value="Technology">Technology</option>
-  <option value="Tools">Tools</option>
-  <option value="Electronics">Electronics</option>
-</select>
-```
+Categories are dynamic — the Shop dropdown, homepage category grid, and admin's category
+select all read distinct values from the `products` table. To add a category, just pick
+"+ Add new category" in the admin Add/Edit Product form. To give a category a custom icon in
+the homepage grid, add an entry to the `ICONS` map in `src/utils/categoryIcons.js`.
 
 ### Modify Branding Colors
 
-Edit `src/index.css`:
+Edit the theme tokens in `src/index.css`:
 ```css
-:root {
-  --auro-dark-blue: #002c66;
-  --auro-light-blue: #004a9f;
-  --auro-accent: #0066cc;
+:root, [data-theme='light'] {
+  --navy: #002c66;
+  --navy-light: #004a9f;
+  --accent: #0066cc;
+  --accent-light: #2f8fff;
   /* ... */
+}
+
+[data-theme='dark'] {
+  /* dark-mode overrides */
 }
 ```
 
