@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import { useCategories } from '../hooks/useCategories'
 
-function Navbar({ onAdminClick, isAdmin, onLogout }) {
+function Navbar({ isAdmin, onLogout }) {
   const { theme, toggleTheme } = useTheme()
   const categories = useCategories()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -83,11 +83,7 @@ function Navbar({ onAdminClick, isAdmin, onLogout }) {
           >
             {theme === 'light' ? '\u{1F319}' : '\u{2600}\u{FE0F}'}
           </button>
-          {!isAdmin ? (
-            <button className="btn btn-secondary btn-sm" onClick={onAdminClick}>
-              Admin
-            </button>
-          ) : (
+          {isAdmin && (
             <>
               <Link to="/admin" className="btn btn-secondary btn-sm">
                 Dashboard

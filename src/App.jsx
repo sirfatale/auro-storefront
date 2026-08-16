@@ -46,11 +46,7 @@ function App() {
   return (
     <ThemeProvider>
       <DisclosureBanner />
-      <Navbar
-        onAdminClick={() => setShowPasswordForm(true)}
-        isAdmin={isAdmin}
-        onLogout={handleLogout}
-      />
+      <Navbar isAdmin={isAdmin} onLogout={handleLogout} />
 
       {showPasswordForm && !isAdmin && (
         <div className="modal-overlay">

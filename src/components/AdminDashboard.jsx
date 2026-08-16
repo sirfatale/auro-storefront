@@ -7,7 +7,7 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('list')
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Technology',
+    category: '',
     price: '',
     description: '',
     affiliate_link: '',
@@ -18,6 +18,10 @@ function AdminDashboard() {
   const [message, setMessage] = useState('')
   const [categories, setCategories] = useState([])
   const [newCategory, setNewCategory] = useState('')
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [deletingCategory, setDeletingCategory] = useState(null)
+  const [mergeTarget, setMergeTarget] = useState('')
 
   useEffect(() => {
     fetchProducts()
@@ -92,7 +96,7 @@ function AdminDashboard() {
 
       setFormData({
         name: '',
-        category: 'Technology',
+        category: '',
         price: '',
         description: '',
         affiliate_link: '',
@@ -141,7 +145,7 @@ function AdminDashboard() {
     setEditingId(null)
     setFormData({
       name: '',
-      category: 'Technology',
+      category: '',
       price: '',
       description: '',
       affiliate_link: '',
@@ -149,6 +153,47 @@ function AdminDashboard() {
       active: true,
     })
     setNewCategory('')
+  }
+
+  const handleRenameCategory = async (oldName) => {
+    const trimmed = renameValue.trim()
+    if (!trimmed || trimmed === oldName) {
+      setEditingCategory(null)
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ category: trimmed })
+        .eq('category', oldName)
+
+      if (error) throw error
+      showMessage(`Renamed "${oldName}" to "${trimmed}"`)
+      setEditingCategory(null)
+      fetchProducts()
+    } catch (err) {
+      showMessage('Error: ' + err.message)
+    }
+  }
+
+  const handleRemoveCategory = async (categoryName) => {
+    if (!mergeTarget) return
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ category: mergeTarget })
+        .eq('category', categoryName)
+
+      if (error) throw error
+      showMessage(`Moved products from "${categoryName}" to "${mergeTarget}"`)
+      setDeletingCategory(null)
+      setMergeTarget('')
+      fetchProducts()
+    } catch (err) {
+      showMessage('Error: ' + err.message)
+    }
   }
 
   return (
@@ -169,6 +214,16 @@ function AdminDashboard() {
             }}
           >
             {editingId ? 'Edit Product' : 'Add Product'}
+          </button>
+          <button
+            className={`${activeTab === 'categories' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('categories')
+              setEditingCategory(null)
+              setDeletingCategory(null)
+            }}
+          >
+            Categories
           </button>
         </div>
       </aside>
@@ -227,6 +282,137 @@ function AdminDashboard() {
           </div>
         )}
 
+        {activeTab === 'categories' && (
+          <div>
+            <h2>Manage Categories</h2>
+            {categories.length === 0 ? (
+              <p>No categories yet. Add a product to create one.</p>
+            ) : (
+              <table className="products-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Products</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map((cat) => {
+                    const count = products.filter((p) => p.category === cat).length
+                    const isEditing = editingCategory === cat
+                    const isDeleting = deletingCategory === cat
+                    const otherCategories = categories.filter((c) => c !== cat)
+
+                    return (
+                      <tr key={cat}>
+                        <td>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              className="shop-input"
+                              value={renameValue}
+                              onChange={(e) => setRenameValue(e.target.value)}
+                              autoFocus
+                            />
+                          ) : (
+                            cat
+                          )}
+                        </td>
+                        <td>{count}</td>
+                        <td>
+                          {isEditing ? (
+                            <>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => handleRenameCategory(cat)}
+                              >
+                                Save
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => setEditingCategory(null)}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : isDeleting ? (
+                            otherCategories.length === 0 ? (
+                              <>
+                                <span style={{ marginRight: '0.75rem' }}>
+                                  Add another category first.
+                                </span>
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => setDeletingCategory(null)}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <select
+                                  className="shop-select"
+                                  value={mergeTarget}
+                                  onChange={(e) => setMergeTarget(e.target.value)}
+                                >
+                                  <option value="">Move products to...</option>
+                                  {otherCategories.map((c) => (
+                                    <option key={c} value={c}>
+                                      {c}
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  className="btn btn-danger btn-sm"
+                                  disabled={!mergeTarget}
+                                  onClick={() => handleRemoveCategory(cat)}
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => setDeletingCategory(null)}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            )
+                          ) : (
+                            <>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  setEditingCategory(cat)
+                                  setRenameValue(cat)
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => {
+                                  setDeletingCategory(cat)
+                                  setMergeTarget('')
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+            <p style={{ marginTop: '1.5rem', fontSize: '0.85rem' }} className="shop-subtitle">
+              Removing a category moves its products to another category you choose —
+              products are never deleted. Renaming updates every product in that category.
+            </p>
+          </div>
+        )}
+
         {activeTab === 'add' && (
           <div>
             <h2>{editingId ? 'Edit Product' : 'Add New Product'}</h2>
@@ -252,14 +438,14 @@ function AdminDashboard() {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="Technology">Technology</option>
-                  <option value="Tools">Tools</option>
-                  <option value="Electronics">Electronics</option>
-                  {categories.map((cat) =>
-                    !['Technology', 'Tools', 'Electronics'].includes(cat) && (
-                      <option key={cat} value={cat}>{cat}</option>
-                    )
-                  )}
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
                   <option value="add-new">+ Add new category</option>
                 </select>
               </div>

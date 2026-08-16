@@ -1076,6 +1076,12 @@ main {
   margin-right: 0.5rem;
 }
 
+.products-table td .shop-select,
+.products-table td .shop-input {
+  margin-right: 0.5rem;
+  max-width: 220px;
+}
+
 .image-preview {
   margin-top: 1.5rem;
   border: 2px solid var(--border);
