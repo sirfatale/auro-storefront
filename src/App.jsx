@@ -10,6 +10,7 @@ import Contact from './pages/Contact'
 import AffiliateDisclosure from './pages/AffiliateDisclosure'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdminDashboard from './components/AdminDashboard'
+import { ADMIN_PATH } from './utils/adminPath'
 
 function AdminGate({ onLoginClick }) {
   return (
@@ -32,7 +33,7 @@ function App() {
     if (password === correctPassword) {
       setIsAdmin(true)
       setShowPasswordForm(false)
-      navigate('/admin')
+      navigate(ADMIN_PATH)
     } else {
       alert('Incorrect password')
     }
@@ -92,7 +93,7 @@ function App() {
           <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route
-            path="/admin"
+            path={ADMIN_PATH}
             element={
               isAdmin ? (
                 <AdminDashboard />

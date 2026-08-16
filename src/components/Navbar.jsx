@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import { useCategories } from '../hooks/useCategories'
+import { ADMIN_PATH } from '../utils/adminPath'
 
 function Navbar({ isAdmin, onLogout }) {
   const { theme, toggleTheme } = useTheme()
@@ -85,7 +86,7 @@ function Navbar({ isAdmin, onLogout }) {
           </button>
           {isAdmin && (
             <>
-              <Link to="/admin" className="btn btn-secondary btn-sm">
+              <Link to={ADMIN_PATH} className="btn btn-secondary btn-sm">
                 Dashboard
               </Link>
               <button className="btn btn-secondary btn-sm" onClick={onLogout}>
