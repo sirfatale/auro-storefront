@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import { useCategories } from '../hooks/useCategories'
+import { useAdminAuth } from '../context/AdminAuthContext'
 import { ADMIN_PATH } from '../utils/adminPath'
 
-function Navbar({ isAdmin, onLogout }) {
+function Navbar() {
   const { theme, toggleTheme } = useTheme()
+  const { isFullyAuthenticated, signOut } = useAdminAuth()
   const categories = useCategories()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -84,12 +86,12 @@ function Navbar({ isAdmin, onLogout }) {
           >
             {theme === 'light' ? '\u{1F319}' : '\u{2600}\u{FE0F}'}
           </button>
-          {isAdmin && (
+          {isFullyAuthenticated && (
             <>
               <Link to={ADMIN_PATH} className="btn btn-secondary btn-sm">
                 Dashboard
               </Link>
-              <button className="btn btn-secondary btn-sm" onClick={onLogout}>
+              <button className="btn btn-secondary btn-sm" onClick={signOut}>
                 Logout
               </button>
             </>

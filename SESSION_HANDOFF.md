@@ -13,10 +13,31 @@ via affiliate links. Branded as **ATG Tech Picks**.
 
 ## URLs & Access
 - **Live Site**: https://store.aurotechgroup.com
-- **Admin Dashboard**: Click "Admin" in the navbar → enter password → redirects to `/admin`
-- **Admin Password**: (user's custom password - set in Cloudflare env var `VITE_ADMIN_PASSWORD`)
+- **Admin Dashboard**: `https://store.aurotechgroup.com/tagaloamode` (no visible link
+  anywhere in the UI — path lives in `src/utils/adminPath.js`). Sign in with a real
+  Supabase Auth email/password, then a TOTP code from an authenticator app (Google
+  Authenticator/Authy). No more env-var password — see "Auth Overhaul" below.
 - **GitHub**: https://github.com/sirfatale/auro-storefront
 - **Cloudflare Pages**: auro-storefront project
+
+## ⚠️ Auth Overhaul (this session) — Action Required
+Replaced the old client-side `VITE_ADMIN_PASSWORD` check (which was never actually secret
+— Vite bakes `VITE_*` vars into the public JS bundle) with real Supabase Auth + mandatory
+TOTP MFA. **Two manual steps still needed on the user's end before this is fully live**:
+
+1. **Create the admin user** in Supabase Dashboard → Authentication → Users → Add User
+   (check "Auto Confirm User"). Not done yet as of this session — no MCP access to the
+   real Supabase project (`xulpelgxkasuzjtshnns`) to do it programmatically.
+2. **Tighten RLS on `products`** — the `anon` key is public by design, so until write
+   policies are updated to require `(auth.jwt() ->> 'aal') = 'aal2'`, someone could still
+   write to the table directly via the Supabase API, bypassing the new login UI entirely.
+   Exact SQL is in README.md under "Admin Access & MFA" → step 2. Not run yet — same MCP
+   access limitation.
+
+Until both of those are done, the new login screen exists but (1) has no account to log
+into yet, and (2) even after that, DB writes aren't actually gated by auth at the
+database level. Check with the user whether they've completed these before assuming the
+dashboard is usable or that the data is protected.
 
 ## Current State ✅
 - **Database**: Supabase (West Coast US, us-west-1)

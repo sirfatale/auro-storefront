@@ -7,11 +7,12 @@ Content/curation site — no cart or checkout, every product links out to Amazon
 
 - **Homepage**: Hero banner, shop-by-category grid, curated "Top Picks" section, trust content, and deal-alert newsletter signup
 - **Shop Page**: Product grid with live search, category filter, sort (Featured / Price / Newest), and a "Showing N products" count
-- **Admin Dashboard**: Add, edit, and delete products; create new categories on the fly
+- **Admin Dashboard**: Add, edit, and delete products; rename or merge categories on the fly
 - **Affiliate Disclosure & Privacy Policy pages**: Placeholder legal copy — see the note below before launch
 - **Dark mode**: Light by default, with a toggle (saved to `localStorage`)
 - **Responsive Design**: Mobile, tablet, and desktop layouts
-- **Password Protected Admin**: Simple password gate for the dashboard
+- **Admin Auth with MFA**: Real Supabase Auth login (email + password) plus a required
+  authenticator-app code (TOTP) — see "Admin Access & MFA" below
 
 ## Tech Stack
 
@@ -34,6 +35,64 @@ before launch. In particular, double-check:
 The Affiliate Disclosure and Privacy Policy pages (`src/pages/AffiliateDisclosure.jsx`,
 `src/pages/PrivacyPolicy.jsx`) both have an inline `legal-notice` callout flagging them as
 placeholder copy.
+
+## 🔐 Admin Access & MFA
+
+The dashboard lives at a non-obvious path (`src/utils/adminPath.js`, currently
+`/tagaloamode`) and requires a real Supabase Auth login — email + password, plus a
+required authenticator-app code (TOTP, e.g. Google Authenticator or Authy). There is no
+env-var password anymore; the old `VITE_ADMIN_PASSWORD` approach was removed because Vite
+bakes `VITE_*` vars into the public JS bundle, so it was never actually secret.
+
+### One-time setup
+
+1. **Create the admin user** — in the Supabase Dashboard, go to
+   **Authentication → Users → Add User**, enter your email and a strong password, and
+   check **Auto Confirm User** (otherwise Supabase waits for an email confirmation link
+   before the account can sign in, and this project doesn't have email sending
+   configured).
+2. **Lock down write access** — this is the step that actually matters. The `products`
+   table's `anon` key is public by design (it ships in every page's JS bundle), so admin
+   login alone doesn't stop someone from calling the Supabase API directly to write data
+   unless the database itself enforces it. In the Supabase SQL Editor, check what write
+   policies currently exist, then replace them with ones that require a fully
+   MFA-verified session:
+
+   ```sql
+   -- See what's currently allowed
+   select policyname, cmd, roles from pg_policies where tablename = 'products';
+
+   -- Drop whatever policy is currently allowing anon/public writes
+   -- (replace "<policy_name>" with what the query above shows for insert/update/delete)
+   -- drop policy "<policy_name>" on products;
+
+   -- Recreate: reads stay public, writes require aal2 (password + verified TOTP code)
+   create policy "Public can read products" on products
+     for select
+     using (true);
+
+   create policy "MFA-verified admin can insert" on products
+     for insert
+     with check ((auth.jwt() ->> 'aal') = 'aal2');
+
+   create policy "MFA-verified admin can update" on products
+     for update
+     using ((auth.jwt() ->> 'aal') = 'aal2')
+     with check ((auth.jwt() ->> 'aal') = 'aal2');
+
+   create policy "MFA-verified admin can delete" on products
+     for delete
+     using ((auth.jwt() ->> 'aal') = 'aal2');
+   ```
+
+3. **Enroll your authenticator app** — go to `/tagaloamode` on the site, sign in with the
+   email/password from step 1, and you'll be prompted to scan a QR code. Scan it with
+   Google Authenticator, Authy, or similar, then enter the 6-digit code it generates.
+   This only happens once per browser/device — the enrolled factor is tied to your
+   Supabase user, not the browser, so signing in from a new device will ask for a code
+   from the same app (no re-enrollment needed).
+
+After that, every login asks for email + password, then a 6-digit code.
 
 ## Prerequisites
 
@@ -90,7 +149,6 @@ CREATE POLICY "Enable read access for all users" ON products
    ```
    VITE_SUPABASE_URL=your-project-url
    VITE_SUPABASE_ANON_KEY=your-anon-key
-   VITE_ADMIN_PASSWORD=your-secure-password
    ```
 
 5. Start the development server:
@@ -113,17 +171,16 @@ CREATE POLICY "Enable read access for all users" ON products
 
 ### 4. Adding Products
 
-1. On the storefront, click the "Admin" button
-2. Enter your admin password (set in .env.local)
-3. Click "Add Product" in the dashboard
-4. Fill in:
+1. Go to `/tagaloamode` and sign in (see "Admin Access & MFA" above)
+2. Click "Add Product" in the dashboard
+3. Fill in:
    - **Product Name**: Name of the item
-   - **Category**: Choose Technology, Tools, or Electronics
+   - **Category**: Pick an existing category or "+ Add new category"
    - **Price**: Product price
    - **Description**: Optional brief description
    - **Amazon Affiliate Link**: Your affiliate link (must start with https://)
    - **Active**: Toggle to show/hide on storefront
-5. Click "Add Product"
+4. Click "Add Product"
 
 ## Deployment to Hostinger
 
@@ -176,7 +233,6 @@ Create a `.env.local` file with these variables:
 ```
 VITE_SUPABASE_URL=https://[project-id].supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_ADMIN_PASSWORD=your-secure-password
 ```
 
 **Important**: Never commit `.env.local` to GitHub. It's in `.gitignore` for security.
@@ -195,10 +251,12 @@ Or add a navigation item in your main site's header.
 
 ### Change Admin Password
 
-Edit `.env.local`:
-```
-VITE_ADMIN_PASSWORD=your-new-password
-```
+Go to Supabase Dashboard → Authentication → Users, find your admin user, and use "Send
+password recovery" or reset it directly there. There's no env var for this anymore.
+
+### Change the Admin URL
+
+Edit `ADMIN_PATH` in `src/utils/adminPath.js`.
 
 ### Change Categories
 
@@ -235,8 +293,14 @@ Edit the theme tokens in `src/index.css`:
 - Check browser console for errors (F12)
 
 ### Admin login not working
-- Ensure VITE_ADMIN_PASSWORD matches what you set in `.env.local`
-- Remember it's case-sensitive
+- "Invalid login credentials" → double check the email/password, and make sure the user
+  was created with "Auto Confirm User" checked (or has confirmed their email)
+- Stuck on the QR code screen → make sure the 6-digit code hasn't expired (they rotate
+  every 30 seconds); if scanning fails, use "Start Over" to get a fresh QR code, or enter
+  the manual secret shown below it
+- Signed in but dashboard still shows "Admin access required" → you're at `aal1`
+  (password only); the QR/code screen should appear automatically — if it doesn't,
+  refresh the page
 
 ### Deploy issues
 - Make sure you ran `npm run build` before uploading
